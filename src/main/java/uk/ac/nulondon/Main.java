@@ -27,7 +27,6 @@ public class Main {
     }
 
     private void energy(Scanner scan) throws IOException {
-        /*
         // highlight and export intermediate image
         editor.highlightLowestEnergySeam();
         // ask for confirmation and try to execute
@@ -37,14 +36,9 @@ public class Main {
         } else {
             editor.undo();
         }
-
-         */
-        editor.highlightLowestEnergySeam();
     }
 
     private void greenest(Scanner scan) throws IOException {
-        //TODO: CHG DIS
-        /* TEMP TEMP TEMP TEMP TEMP
         // highlight and export intermediate image
         editor.highlightGreenest();
         // ask for confirmation and try to execute
@@ -54,10 +48,6 @@ public class Main {
         } else {
             editor.undo();
         }
-
-         */
-        editor.highlightGreenest();
-
     }
 
     private void run() throws IOException {
