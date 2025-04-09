@@ -1,7 +1,7 @@
-# uk.ac.nulondon:project2
+# AE3 Final Project
 
-Write your project description here...
+Image editor based on a "energy" system based on pixel brightness.
+
+Authors: Michael Zhang, Joyce Lee, Chenhong Xu
 
 Java version 21
-
-Generated at 2024-02-14 10:04:00
