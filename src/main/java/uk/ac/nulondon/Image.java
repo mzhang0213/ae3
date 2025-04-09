@@ -104,6 +104,7 @@ public class Image {
     }
 
     public void removeSeam(List<Pixel> seam) {
+        width--;
         for (int i=0;i<height;i++){
             Pixel curr = seam.get(i);
             if (curr.left!=null&&curr.right!=null) {
@@ -119,6 +120,7 @@ public class Image {
     }
 
     public void addSeam(List<Pixel> seam) {
+        height++;
         for (int i=0;i<height;i++){
             Pixel curr = seam.get(i);
             if (curr.right!=null){
@@ -139,7 +141,6 @@ public class Image {
         Pixel curr = rows.get(0);
 
         calculateEnergy();
-
 
         //init for first row
         if (height == 1){
