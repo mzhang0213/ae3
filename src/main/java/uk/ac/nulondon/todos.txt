@@ -1,0 +1,2 @@
+-check edge cases
+    -height==0, width==0
