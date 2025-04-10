@@ -13,7 +13,7 @@ import java.util.List;
 /*APPLICATION SERVICE LAYER*/
 
 public class ImageEditor {
-    private Deque<Command> undoStack = new ArrayDeque<>();
+    private Stack<Command> undoStack = new Stack<>();
 
     private Image image;
 
@@ -25,45 +25,75 @@ public class ImageEditor {
         image = new Image(img);
     }
 
+    /**
+     * Save the image
+     * @param filePath Where image is saved
+     * @throws IOException
+     */
     public void save(String filePath) throws IOException {
         BufferedImage img = image.toBufferedImage();
         ImageIO.write(img, "png", new File(filePath));
     }
 
+    /**
+     * Highlight greenest seam
+     * @throws IOException
+     */
     public void highlightGreenest() throws IOException {
-        executeCommand(new highlightGreenCommand());
-        save("target/highlightedGreen.png");
+        executeCommand(new highlightGreenCommand()); //Execute command to highlight green
+        save("target/highlightedGreen.png");//Export image
     }
 
+    /**
+     * Remove highlighted seam
+     * @throws IOException
+     */
     public void removeHighlighted() throws IOException {
-        executeCommand(new removeHighlightCommand());
-        save("target/removedSeam.png");
+        executeCommand(new removeHighlightCommand()); //Execute command to remove highlight
+        save("target/removedSeam.png"); //Export image
     }
 
+    /**
+     * Undo command
+     * @throws IOException
+     */
     public void undo() throws IOException {
-        if (!undoStack.isEmpty()) {//if the stack is not empty
-            Command command = undoStack.pop(); //pop action
-            command.undo(); //undo
-            save("target/undidSeam.png");//export
-        } else {//if stack is empty
-            System.out.println("Nothing to undo");
+        if (!undoStack.isEmpty()) {//If the stack is not empty
+            Command command = undoStack.pop(); //Pop action
+            command.undo(); //Undo command
+            save("target/undidSeam.png");//Export image
+        } else {//If stack is empty
+            System.out.println("Nothing to undo"); //Message
         }
     }
 
+    /**
+     * Executes command
+     * @param command given
+     * @throws IOException
+     */
     public void executeCommand(Command command) throws IOException {
-        command.execute();
+        command.execute();//Executes given command
         undoStack.push(command);//push action
     }
 
+    /**
+     * Highlight the lowest energy seam
+     * @throws IOException
+     */
     public void highlightLowestEnergySeam() throws IOException {
-        executeCommand(new highlightLowestEnergySeamCommand());
-        save("target/highlightLowestEnergy.png");
+        executeCommand(new highlightLowestEnergySeamCommand()); //Execute command to highlight lowest energy seam
+        save("target/highlightLowestEnergy.png");//Export image
     }
 
     interface Command {
         void execute();
         void undo();
     }
+
+    /**
+     * Command for highlighting the greenest seam
+     */
     private class highlightGreenCommand implements Command {
         private List<Pixel> originalSeam;
 
@@ -77,6 +107,9 @@ public class ImageEditor {
         }
     }
 
+    /**
+     * Command for removing highlight
+     */
     private class removeHighlightCommand implements Command {
         private List<Pixel> removedSeam;
 
@@ -92,8 +125,13 @@ public class ImageEditor {
         @Override
         public void undo() {
             image.addSeam(removedSeam); //Add the removed seam back
+
         }
     }
+
+    /**
+     * Command for highlighting the lowest energy seam
+     */
     private class highlightLowestEnergySeamCommand implements Command {
         private List<Pixel> originalSeam;
         @Override
@@ -104,6 +142,8 @@ public class ImageEditor {
         public void undo() {
 
         }
+
+
     }
 
 }
