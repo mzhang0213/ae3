@@ -27,6 +27,7 @@ public class ImageEditor {
 
     /**
      * Save the image
+     *
      * @param filePath Where image is saved
      * @throws IOException
      */
@@ -37,6 +38,7 @@ public class ImageEditor {
 
     /**
      * Highlight greenest seam
+     *
      * @throws IOException
      */
     public void highlightGreenest() throws IOException {
@@ -46,6 +48,7 @@ public class ImageEditor {
 
     /**
      * Remove highlighted seam
+     *
      * @throws IOException
      */
     public void removeHighlighted() throws IOException {
@@ -55,6 +58,7 @@ public class ImageEditor {
 
     /**
      * Undo command
+     *
      * @throws IOException
      */
     public void undo() throws IOException {
@@ -69,6 +73,7 @@ public class ImageEditor {
 
     /**
      * Executes command
+     *
      * @param command given
      * @throws IOException
      */
@@ -79,6 +84,7 @@ public class ImageEditor {
 
     /**
      * Highlight the lowest energy seam
+     *
      * @throws IOException
      */
     public void highlightLowestEnergySeam() throws IOException {
@@ -88,6 +94,7 @@ public class ImageEditor {
 
     interface Command {
         void execute();
+
         void undo();
     }
 
@@ -99,11 +106,14 @@ public class ImageEditor {
 
         @Override
         public void execute() {
-            highlightedSeam = image.highlightSeam(image.getGreenestSeam(), new Color(0, 255, 0)); //Make originalSeam to highlight green at the greenest seam
+            originalSeam = image.getGreenestSeam();
+            highlightedSeam = image.highlightSeam(originalSeam, new Color(0, 0, 255)); //Make originalSeam to highlight green at the greenest seam
         }
+
         @Override
         public void undo() {
-
+            image.removeSeam(highlightedSeam);
+            image.addSeam(originalSeam);
         }
     }
 
@@ -119,13 +129,14 @@ public class ImageEditor {
                 removedSeam = new ArrayList<>();// Create a copy for the seam that will be removed
                 image.removeSeam(highlightedSeam); //remove seam from image
                 highlightedSeam = null; //highlightedSeam does not exist after removal
+            } else {
+                System.out.println("No seam highlighted");
             }
         }
 
         @Override
         public void undo() {
             image.addSeam(removedSeam); //Add the removed seam back
-
         }
     }
 
@@ -134,16 +145,16 @@ public class ImageEditor {
      */
     private class highlightLowestEnergySeamCommand implements Command {
         private List<Pixel> originalSeam;
+
         @Override
         public void execute() {
-            highlightedSeam = image.highlightSeam(image.getLowestEnergySeam(), new Color(250, 0, 0));//Make the original seam equal to the new seam which highlights the lowest energy seam of image in the color red
+            originalSeam = image.getLowestEnergySeam();
+            highlightedSeam = image.highlightSeam(originalSeam, new Color(250, 0, 0));//Make the original seam equal to the new seam which highlights the lowest energy seam of image in the color red
         }
+
         @Override
         public void undo() {
-
+            image.addSeam(originalSeam);
         }
-
-
     }
-
 }
