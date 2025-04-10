@@ -124,7 +124,6 @@ public class Image {
      * @param seam Sequence of pixels
      */
     public void removeSeam(List<Pixel> seam) {
-        width--;//Adjust width of image
         for (int i=0;i<height;i++){ //Iterate through rows in image
             Pixel curr = seam.get(i); //Current pixel in seam
             if (curr.left!=null&&curr.right!=null) { //If current pixel has neighbors on right and left
@@ -137,6 +136,7 @@ public class Image {
                 curr.left.right = null; //Left neighbor's right is nonexistent
             }
         }
+        width--;//Adjust width of image
     }
 
     /**
@@ -144,7 +144,6 @@ public class Image {
      * @param seam Sequence of pixels
      */
     public void addSeam(List<Pixel> seam) {
-        height++;//Adjust height of image
         for (int i=0;i<height;i++){ //Iterate through image rows
             Pixel curr = seam.get(i); //Current pixel of seam
             if (curr.right!=null){ //If right of current exists
@@ -156,6 +155,7 @@ public class Image {
                 rows.set(i,curr);//Set i to current pixel
             }
         }
+        width++;//Adjust height of image
     }
 
     /**
