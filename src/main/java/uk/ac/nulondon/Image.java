@@ -155,7 +155,7 @@ public class Image {
                 rows.set(i,curr);//Set i to current pixel
             }
         }
-        width++;//Adjust height of image
+        width++;//Adjust width of image
     }
 
     /**
