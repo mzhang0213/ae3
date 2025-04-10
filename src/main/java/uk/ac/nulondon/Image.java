@@ -3,6 +3,7 @@ package uk.ac.nulondon;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -53,94 +54,122 @@ public class Image {
         return height;
     }
 
+    /**
+     * Calculate energy based on neighbours of the current pixel
+     * @param above pixel on top of the current pixel
+     * @param current pixel being calculated
+     * @param below pixel on the bottom of the current pixel
+     * @return energy at current pixel
+     */
     double energy(Pixel above, Pixel current, Pixel below) {
         double horizontalEnergy = above.left.brightness() + current.left.brightness() * 2 + below.left.brightness() - above.right.brightness() - current.right.brightness() * 2 - below.right.brightness();
         double verticalEnergy = above.left.brightness() + above.brightness() * 2 + above.right.brightness() - below.left.brightness() - below.brightness() * 2 - below.right.brightness();
-        return Math.sqrt(horizontalEnergy * horizontalEnergy + verticalEnergy * verticalEnergy);
+        return Math.sqrt(horizontalEnergy * horizontalEnergy + verticalEnergy * verticalEnergy); //Energy formula
     }
 
+    /**
+     * Calculate energy for all the pixels in the image
+     */
     public void calculateEnergy() {
-        for (int i = 0; i < height; i++) {
-            Pixel curr = rows.get(i);
-            if (i == 0 || i == height - 1){
-                for (int j = 0; j < width; j++){
-                    curr.energy = curr.brightness();
-                    curr = curr.right;
+        for (int i = 0; i < height; i++) {//Iterate through image rows
+            Pixel curr = rows.get(i); //Current pixel in seam
+            if (i == 0 || i == height - 1){ //If edge pixel (top or bottom row)
+                for (int j = 0; j < width; j++){ //Iterate through row
+                    curr.energy = curr.brightness(); //Edge pixel energy is equal to the brightness of pixel
+                    curr = curr.right; //Move to the right
                 }
                 continue;
             }
-            Pixel above = rows.get(i-1);
-            Pixel below = rows.get(i+1);
-            for (int j = 0; j < width; j++) {
-                if (j == 0 || j == width - 1){
-                    curr.energy = curr.brightness();
+            Pixel above = rows.get(i-1);//Pixel has an above pixel
+            Pixel below = rows.get(i+1); //Pixel has a below pixel
+            for (int j = 0; j < width; j++) {//Iterate through row
+                if (j == 0 || j == width - 1){ //If edge pixel (first or last pixel of row)
+                    curr.energy = curr.brightness();//Edge pixel energy is equal to the brightness of pixel
                 }else{
-                    curr.energy = energy(above, curr, below);
+                    curr.energy = energy(above, curr, below); //Normal energy calculation if not an edge pixel
                 }
-                curr = curr.right;
-                above = above.right;
-                below = below.right;
+                curr = curr.right;//Move to the right
+                above = above.right; //Move to the right
+                below = below.right; //Move to the right
             }
         }
     }
 
+    /**
+     * Highlights the seam
+     * @param seam Sequence of pixels
+     * @param color Color of highlight
+     * @return Previous value of seam
+     */
     public List<Pixel> highlightSeam(List<Pixel> seam, Color color) {
-        //check pixel neighbors per row; guarantee identity with the same neighbors
-        for (int i=0;i<height;i++){
-            Pixel curr = seam.get(i);
-            Pixel highlight = new Pixel(color);
-            if (curr.right!=null) {
-                highlight.right = curr.right;
-                curr.right.left = highlight;
+        for (int i=0;i<height;i++){ //Iterate through each image row
+            Pixel curr = seam.get(i); //Current pixel in seam
+            Pixel highlight = new Pixel(color); //Highlight color
+            if (curr.right!=null) { //If right of current exist
+                highlight.right = curr.right; //Right of highlight seam is equal to right of current seam
+                curr.right.left = highlight; //Right neighbor goes back to highlight
             }
-            if (curr.left!=null) {
-                highlight.left = curr.left;
-                curr.left.right = highlight;
-            }else{
-                rows.set(i,highlight);
+            if (curr.left!=null) { //If left of current exists
+                highlight.left = curr.left; //Left of highlight seam is equal to left of current seam
+                curr.left.right = highlight; //Left neighbor goes back to highlight
+            }else{ //Current pixel has no neighbors
+                rows.set(i,highlight);//Set i to highlight
             }
         }
-        return seam;
+        return seam; //Original seam
     }
 
+    /**
+     * Removes provided seam
+     * @param seam Sequence of pixels
+     */
     public void removeSeam(List<Pixel> seam) {
-        width--;
-        for (int i=0;i<height;i++){
-            Pixel curr = seam.get(i);
-            if (curr.left!=null&&curr.right!=null) {
-                curr.right.left = curr.left;
-                curr.left.right = curr.right;
+        width--;//Adjust width of image
+        for (int i=0;i<height;i++){ //Iterate through rows in image
+            Pixel curr = seam.get(i); //Current pixel in seam
+            if (curr.left!=null&&curr.right!=null) { //If current pixel has neighbors on right and left
+                curr.right.left = curr.left; //Right neighbor's left is the new left neighbor
+                curr.left.right = curr.right;//Left neighbor's right is the new right neighbor
             }else if (curr.right!=null){ //curr.left == null
-                curr.right.left = null;
-                rows.set(i,curr.right);
+                curr.right.left = null; //Right neighbor's left is nonexistent
+                rows.set(i,curr.right);//Update i to right neighbor
             }else if (curr.left!=null) { //curr.right == null
-                curr.left.right = null;
+                curr.left.right = null; //Left neighbor's right is nonexistent
             }
         }
     }
 
+    /**
+     * Add the provided seam
+     * @param seam Sequence of pixels
+     */
     public void addSeam(List<Pixel> seam) {
-        height++;
-        for (int i=0;i<height;i++){
-            Pixel curr = seam.get(i);
-            if (curr.right!=null){
-                curr.right.left = curr;
+        height++;//Adjust height of image
+        for (int i=0;i<height;i++){ //Iterate through image rows
+            Pixel curr = seam.get(i); //Current pixel of seam
+            if (curr.right!=null){ //If right of current exists
+                curr.right.left = curr; //Move to right of current then go left and set as the current pixel
             }
-            if (curr.left!=null) {
-                curr.left.right = curr;
-            }else{
-                rows.set(i,curr);
+            if (curr.left!=null) { //If left of current pixel exists
+                curr.left.right = curr; //Left neighbor's right is the current
+            }else{ //If current pixel has no neighbors
+                rows.set(i,curr);//Set i to current pixel
             }
         }
     }
 
+    /**
+     * Find the seam which maximizes total value extracted from the given pixel
+     * @param valueGetter Calculates value of pixel energy
+     * @return The seam with the maximum total value
+     */
     private List<Pixel> getSeamMaximizing(Function<Pixel, Double> valueGetter) {
-        List<List<Pixel>> maximizedPixels = new ArrayList<>();
-        List<List<Integer>> direction = new ArrayList<>();
+        List<List<Pixel>> maximizedPixels = new ArrayList<>(); //Stores best pixels
+        List<List<Integer>> direction = new ArrayList<>(); //Stores the direction of movement
         List<Pixel> ret = new ArrayList<>();
         Pixel curr = rows.get(0);
 
-        calculateEnergy();
+        calculateEnergy(); //Calculate energy
 
         //init for first row
         if (height == 1){
@@ -163,12 +192,12 @@ public class Image {
         }
 
 
-        //calc for future rows
-        for (int i=1;i<height;i++){
-            Pixel above = rows.get(i-1);
-            curr = rows.get(i);
-            for (int j=0;j<width;j++){
-                //calc
+        //Calculate for future rows
+        for (int i=1;i<height;i++){ //iterate through image rows
+            Pixel above = rows.get(i-1);//Above pixel
+            curr = rows.get(i); //Current pixel
+            for (int j=0;j<width;j++){ //Iterate through row
+                //Calculate
                 int dir = 0;
                 double max = valueGetter.apply(above);
                 if (j>0&&valueGetter.apply(above.left)>max) {
@@ -197,9 +226,8 @@ public class Image {
         }
 
 
-        //find max seam in last row
-
-        curr = rows.get(height-1);
+        //Find max seam in last row
+        curr = rows.get(height-1); //Current pixel in last row
         Pixel best = curr;
         int seamPos = 0;
         double max = valueGetter.apply(maximizedPixels.get(height-1).getFirst());
@@ -216,8 +244,7 @@ public class Image {
         ret.addFirst(best);
 
 
-        //find the actual seam
-
+        //Find the actual seam
         for (int i=height-1;i>=1;i--){
             seamPos = direction.get(i).get(seamPos);
             ret.addFirst(maximizedPixels.get(i).get(seamPos));
@@ -226,8 +253,12 @@ public class Image {
         return ret;
     }
 
+    /**
+     * Gets the greenest seam in the image
+     * @return Greenest seam
+     */
     public List<Pixel> getGreenestSeam() {
-        return getSeamMaximizing(Pixel::getGreen);
+        return getSeamMaximizing(Pixel::getGreen); //Get greenest seam
         /*Or, since we haven't lectured on lambda syntax in Java, this can be
         return getSeamMaximizing(new Function<Pixel, Double>() {
             @Override
@@ -235,13 +266,18 @@ public class Image {
                 return pixel.getGreen();
             }
         });*/
+
     }
 
+    /**
+     * Gets the seam with the lowest energy
+     * @return Seam with the lowest energy
+     */
     public List<Pixel> getLowestEnergySeam() {
         /*
         Maximizing negation of energy is the same as minimizing the energy.
          */
-        return getSeamMaximizing(pixel -> -pixel.energy);
+        return getSeamMaximizing(pixel -> -pixel.energy); //Get seam with lowest-energy
 
         /*Or, since we haven't lectured on lambda syntax in Java, this can be
         return getSeamMaximizing(new Function<Pixel, Double>() {
